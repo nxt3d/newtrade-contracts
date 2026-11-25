@@ -1,0 +1,38 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc = "0.8.28"
+optimizer = true
+optimizer_runs = 1
+evm_version = "cancun"
+# The IR pipeline is REQUIRED, not an optimisation. repairLegacyListing does not
+# compile under the legacy pipeline: solc fails with "Stack too deep" and itself
+# recommends --via-ir. It also reclaims the EIP-170 headroom the repair needs -
+# 24,438 -> 20,716 bytes for the startTime slice alone.
+#
+# Verified before switching: storageLayout is byte-for-byte identical under both
+# pipelines, and the full suite passes identically (95 passed, 0 failed).
+#
+# NOTE: the earlier deployed implementation 0xdB2a628b... was built with the
+# LEGACY pipeline, so it is not reproducible with these settings.
+via_ir = true
+# The release-review binding rule requires storageLayout in the artifact.
+# Its absence was raised as S-1 on the previous candidate; emitting it here
+# rather than relying on a reviewer rebuild. Bytecode is unaffected.
+extra_output = ["storageLayout"]
+# Read-only access to src/ for the owed-ledger SOURCE GUARD
+# (test/V2FeeFromProceeds.t.sol): it counts every `_claimable[` in the escrow's
+# source. No write access; bytecode is unaffected.
+fs_permissions = [{ access = "read", path = "./src" }, { access = "read", path = "./test/legacy" }]
+remappings = [
+    "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+]
+
+[invariant]
+runs = 64
+depth = 24
+fail_on_revert = false
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

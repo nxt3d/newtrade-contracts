@@ -1,0 +1,21 @@
+# Compiler files
+cache/
+out/
+
+# Ignores deployment broadcast logs
+broadcast/
+
+# Dotenv files — NEVER commit RPC keys / secrets
+.env
+.env.*
+!.env.example
+
+# Devnet deployment artifacts (may contain addresses / private keys)
+deployments*.json
+
+
+# Node tooling deps (parity check)
+tooling/node_modules/
+tooling/package-lock.json
+tooling/pnpm-lock.yaml
+tooling/generated/
